@@ -39,13 +39,17 @@ return [
     | application's "username" field. Typically, this might be the email
     | address of the users but you are free to change this value here.
     |
-    | Out of the box, Fortify expects forgot password and reset password
-    | requests to have a field named 'email'. If the application uses
-    | another name for the field you may define it below as needed.
+    | StudyNest uses a single "login" input that can hold a Principal ID,
+    | Teacher ID, or LRN. The actual lookup logic lives in
+    | App\Providers\FortifyServiceProvider via Fortify::$username and
+    | Fortify::authenticateUsing().
+    |
+    | The 'email' key below is still used for password reset broker lookups,
+    | so it stays as 'email'.
     |
     */
 
-    'username' => 'email',
+    'username' => 'login',
 
     'email' => 'email',
 
@@ -58,9 +62,12 @@ return [
     | them in the database, as some database system string fields are case
     | sensitive. You may disable this for your application if necessary.
     |
+    | Disabled here because IDs like "PRN-001" and "TCH-001" are
+    | case-sensitive / mixed-case by design.
+    |
     */
 
-    'lowercase_usernames' => true,
+    'lowercase_usernames' => false,
 
     /*
     |--------------------------------------------------------------------------
@@ -70,6 +77,11 @@ return [
     | Here you may configure the path where users will get redirected during
     | authentication or password reset when the operations are successful
     | and the user is authenticated. You are free to change this value.
+    |
+    | Note: actual post-login redirects are role-based and handled by
+    | App\Http\Responses\LoginResponse. This 'home' value is only a
+    | fallback used by Fortify in places that don't go through that
+    | custom response (e.g. password reset success).
     |
     */
 
@@ -139,6 +151,8 @@ return [
     |--------------------------------------------------------------------------
     |
     | These settings configure Fortify's passkey (WebAuthn) support.
+    | Not used since the passkeys feature is disabled below, but left
+    | intact in case it's needed later.
     |
     */
 
@@ -158,20 +172,30 @@ return [
     | by removing them from this array. You're free to only remove some of
     | these features, or you can even remove all of these if you need to.
     |
+    | StudyNest:
+    | - registration: REMOVED — only the Principal creates accounts (seeded).
+    | - emailVerification: REMOVED — accounts use LRN/Teacher ID/Principal ID,
+    |   not email, so there's nothing meaningful to verify.
+    | - twoFactorAuthentication / passkeys: REMOVED — out of scope for this
+    |   capstone's auth flow.
+    | - resetPasswords, updateProfileInformation, updatePasswords: KEPT —
+    |   useful for the "Settings" pages and forgot-password flow.
+    |
     */
 
     'features' => [
-        Features::registration(),
+        // Features::registration(),
         Features::resetPasswords(),
-        Features::emailVerification(),
-        Features::twoFactorAuthentication([
-            'confirm' => true,
-            'confirmPassword' => true,
-            // 'window' => 0
-        ]),
-        Features::passkeys([
-            'confirmPassword' => true,
-        ]),
+        // Features::emailVerification(),
+        Features::updateProfileInformation(),
+        Features::updatePasswords(),
+        // Features::twoFactorAuthentication([
+        //     'confirm' => true,
+        //     'confirmPassword' => true,
+        // ]),
+        // Features::passkeys([
+        //     'confirmPassword' => true,
+        // ]),
     ],
 
 ];

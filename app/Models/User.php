@@ -47,6 +47,18 @@ class User extends Authenticatable implements PasskeyUser
     ];
 
     /**
+     * The accessors to append to the model's array/JSON form.
+     *
+     * 'name' is required by the frontend UserInfo / useInitials components,
+     * which expect a single display name field.
+     *
+     * @var list<string>
+     */
+    protected $appends = [
+        'name',
+    ];
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -63,6 +75,15 @@ class User extends Authenticatable implements PasskeyUser
     }
 
     // ========== ACCESSORS ==========
+
+    /**
+     * Full name used by the frontend (sidebar, avatars, etc.)
+     */
+    public function getNameAttribute(): string
+    {
+        return trim("{$this->first_name} {$this->last_name}");
+    }
+
     public function getFullNameAttribute(): string
     {
         return "{$this->first_name} {$this->last_name}";
