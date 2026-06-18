@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Principal\DashboardController;
 
 Route::inertia('/', 'welcome')->name('home');
 
@@ -14,7 +15,7 @@ Route::middleware(['auth', 'role:principal'])
     ->prefix('principal')
     ->name('principal.')
     ->group(function () {
-        Route::inertia('/dashboard', 'principal/dashboard')->name('dashboard');
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     });
 
 // ========== TEACHER ==========
